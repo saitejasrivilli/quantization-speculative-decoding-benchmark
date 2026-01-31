@@ -373,35 +373,15 @@ jupyter notebook quantization_speculative_benchmark.ipynb
 ```
 quantization-speculative-decoding-benchmark/
 ├── README.md
-├── requirements.txt
-├── LICENSE
-├── .gitignore
-│
-├── quantization_speculative_benchmark.ipynb
-│   └── Main production-grade notebook
-│
-├── benchmarks/
-│   ├── plots/
-│   │   ├── 01_memory_comparison.png
-│   │   ├── 02_throughput_comparison.png
-│   │   ├── 03_accuracy_vs_compression.png
-│   │   ├── 04_comprehensive_dashboard.png
-│   │   ├── 05_cost_savings.png
-│   │   ├── 06_comparison_matrix.png
-│   │   ├── 07_speedup_comparison.png
-│   │   └── 08_gpu_cost_comparison.png
-│   ├── results/
-│   │   └── benchmark_results.csv
-│   └── sample_data/
-│       └── Test data for benchmarking
-│
-├── config/
-│   └── gpu_specs.yaml
-│
-└── docs/
-    ├── ARCHITECTURE.md
-    ├── OPTIMIZATION_GUIDE.md
-    └── TROUBLESHOOTING.md
+├── quantization_speculative_benchmark.ipynb   # Main notebook
+├── 01_memory_comparison.png
+├── 02_throughput_comparison.png
+├── 03_accuracy_vs_compression.png
+├── 04_comprehensive_dashboard.png
+├── 05_cost_savings.png
+├── 06_comparison_matrix.png
+├── 07_speedup_comparison.png
+└── 08_gpu_cost_comparison.png
 ```
 
 ---
