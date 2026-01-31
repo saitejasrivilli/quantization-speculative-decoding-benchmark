@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=flat-square)](https://github.com)
 
-**Comprehensive benchmarking framework for LLM inference optimization through quantization and speculative decoding.**
+**Comprehensive benchmarking framework for LLM inference optimization through quantization, speculative decoding, and cross-platform deployment.**
 
 > Achieve **75% memory reduction**, **3.3x inference speedup**, and maintain **99%+ accuracy** through systematic optimization.
 
@@ -14,17 +14,16 @@
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Problem Statement](#problem-statement)
-- [Solution Approach](#solution-approach)
-- [Key Results](#key-results)
-- [Performance Benchmarks](#performance-benchmarks)
-- [Technical Implementation](#technical-implementation)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Benchmark Results](#benchmark-results)
-- [Deployment Recommendations](#deployment-recommendations)
-- [Contributing](#contributing)
+- [Overview](#-overview)
+- [What's New in v2.1](#-whats-new-in-v21)
+- [Problem Statement](#-problem-statement)
+- [Solution Approach](#-solution-approach)
+- [Key Results](#-key-results)
+- [Performance Benchmarks](#-performance-benchmarks)
+- [Technical Implementation](#-technical-implementation)
+- [Getting Started](#-getting-started)
+- [Deployment Recommendations](#-deployment-recommendations)
+- [Contributing](#-contributing)
 
 ---
 
@@ -33,6 +32,7 @@
 This project presents a **complete end-to-end benchmarking framework** for optimizing Large Language Model (LLM) inference through:
 
 - **5 Advanced Quantization Methods** - FP16, INT8, INT4-NF4, GPTQ, AWQ
+- **ONNX Runtime Integration** - Cross-platform deployment with INT8 quantization
 - **Speculative Decoding** - Dual-model inference acceleration (2-3x speedup)
 - **GPU Profiling System** - Kernel-level performance metrics and bottleneck identification
 - **Comprehensive Benchmarking** - Real-world performance measurement across multiple metrics
@@ -40,6 +40,39 @@ This project presents a **complete end-to-end benchmarking framework** for optim
 - **Intelligent Recommendations** - Use case-specific optimization strategies
 
 **Perfect for:** ML Engineers, AI Infrastructure specialists, LLM researchers, and production systems optimization.
+
+---
+
+## 🆕 What's New in v2.1
+
+### ONNX Runtime & Cross-Platform Deployment
+
+The latest notebook now includes comprehensive ONNX Runtime benchmarking for cross-platform deployment:
+
+| Method | Latency (ms) | Throughput | Model Size | Speedup |
+|--------|-------------|------------|------------|---------|
+| PyTorch FP16 | ~800 | ~60 t/s | ~14.0 GB | 1.0x |
+| PyTorch INT8 | ~450 | ~110 t/s | ~7.0 GB | 1.8x |
+| PyTorch INT4-NF4 | ~300 | ~165 t/s | ~3.6 GB | 2.8x |
+| GPTQ | ~320 | ~155 t/s | ~3.8 GB | 2.5x |
+| AWQ | ~310 | ~160 t/s | ~3.7 GB | 2.6x |
+| **ONNX FP32 (CPU)** | 2557 | 11.7 t/s | 4401 MB | baseline |
+| **ONNX INT8 (CPU)** | 1144 | 26.2 t/s | 1104 MB | **2.2x** |
+| TensorRT (est) | ~200 | ~250 t/s | ~3.5 GB | ~4.0x |
+
+**Key ONNX Results:**
+- **2.23x speedup** from FP32 to INT8 quantization
+- **3.99x compression** (74.9% smaller models)
+- Portable deployment across CPU/GPU/Edge devices
+
+### New Deployment Options
+
+```
+DEPLOYMENT RECOMMENDATIONS:
+├─ Memory-constrained: INT4-NF4 (75% reduction)
+├─ Speed-critical NVIDIA: TensorRT INT8 (~4x speedup)
+└─ Cross-platform/Edge: ONNX INT8 (portable, 2.2x speedup)
+```
 
 ---
 
@@ -64,16 +97,16 @@ Large Language Models have become essential to modern AI, but deployment faces c
 - Annual costs for production: $M+ for large deployments
 - Cost dominates total cost of ownership
 
-**4. Limited Accessibility**
-- Most researchers and startups can't afford deployment
-- Creates barrier to entry for innovation
-- Centralizes AI capability to well-funded organizations
+**4. Cross-Platform Deployment**
+- NVIDIA-only solutions limit deployment options
+- Edge devices require portable solutions
+- Different platforms need different optimization strategies
 
 ### Baseline Metrics
 
 ```
 Without Optimization (FP32):
-├─ Model Size: 3.8 GB (GPT-2)
+├─ Model Size: 3.8 GB (GPT-2) / 14 GB (Llama-7B)
 ├─ Throughput: 45 tokens/sec
 ├─ Latency: 22ms per token
 ├─ GPU Needed: A100 ($10,000+)
@@ -124,7 +157,32 @@ AWQ (Activation-Weighted)
 └─ Complexity: ⭐⭐⭐⭐⭐ Very Hard
 ```
 
-#### **Tier 2: Speculative Decoding**
+#### **Tier 2: ONNX Runtime Deployment** *(New in v2.1)*
+
+Cross-platform optimization through ONNX export and quantization:
+
+```
+PyTorch Model
+     ↓
+  ┌──────────────────────────────┐
+  │  torch.onnx.export()         │
+  │  Convert to ONNX format      │
+  └──────────────────────────────┘
+     ↓
+  ┌──────────────────────────────┐
+  │  ORTQuantizer                │
+  │  Apply INT8 quantization     │
+  └──────────────────────────────┘
+     ↓
+  ┌──────────────────────────────┐
+  │  ONNX Runtime Session        │
+  │  Deploy on any platform      │
+  └──────────────────────────────┘
+     ↓
+  Result: 2.2x speedup, 75% smaller, portable
+```
+
+#### **Tier 3: Speculative Decoding**
 
 Novel inference acceleration through dual-model verification:
 
@@ -138,7 +196,7 @@ Speculative:  [Draft] → Propose K → [Target] → Verify All
 Result: 2-3x effective speedup with <0.2% accuracy loss
 ```
 
-#### **Tier 3: GPU Profiling**
+#### **Tier 4: GPU Profiling**
 
 Kernel-level analysis to identify actual bottlenecks:
 
@@ -151,25 +209,11 @@ Metrics Captured:
 └─ Compute vs Memory boundedness
 ```
 
-#### **Tier 4: Comprehensive Validation**
-
-Rigorous benchmarking across real hardware and models:
-
-```
-Tested On:
-├─ GPUs: T4, L4, A100, H100, RTX4090
-├─ Models: GPT-2, Phi-3, Llama-2-7B
-├─ Metrics: Memory, speed, accuracy, GPU utilization
-└─ Runs: Multiple iterations with warmup for statistical significance
-```
-
 ---
 
 ## 📊 Key Results
 
 ### Memory Optimization: 75% Reduction
-
-![Memory Comparison](01_memory_comparison.png)
 
 **From 3.8 GB (FP32) to 0.95 GB (INT4-NF4)**
 - Enables cheaper GPU deployment (L4 instead of A100)
@@ -178,8 +222,6 @@ Tested On:
 
 ### Inference Speedup: 3.3x Faster
 
-![Throughput Comparison](02_throughput_comparison.png)
-
 **From 45 tokens/sec to 150 tokens/sec**
 - With speculative decoding: Up to 3.3x improvement
 - Significantly improves user experience
@@ -187,26 +229,12 @@ Tested On:
 
 ### Accuracy Retained: 99%+
 
-![Accuracy vs Compression](03_accuracy_vs_compression.png)
-
 **Only 0.7% loss with 87% memory reduction**
 - Quality is maintained despite aggressive compression
 - Acceptable trade-off for production systems
 - INT4-NF4 offers optimal balance
 
-### Complete Performance Dashboard
-
-![Comprehensive Dashboard](04_comprehensive_dashboard.png)
-
-**All metrics at a glance:**
-- Memory usage across methods
-- Inference throughput comparison
-- Accuracy retention analysis
-- GPU utilization efficiency
-
 ### Cost Impact: $3.6M Annual Savings
-
-![Cost Savings](05_cost_savings.png)
 
 **Running 1M inference requests per day:**
 - Before: $350k/month ($4.2M/year)
@@ -217,9 +245,7 @@ Tested On:
 
 ## 🏆 Performance Benchmarks
 
-### Quantization Methods Comparison
-
-![Comparison Matrix](06_comparison_matrix.png)
+### Complete Quantization Methods Comparison
 
 | Method | Memory | Speed | Accuracy | Complexity | Production Ready |
 |--------|--------|-------|----------|------------|------------------|
@@ -228,26 +254,17 @@ Tested On:
 | **INT4-NF4** | 0.95 GB | 3.3x | 98.8% | ⭐⭐⭐ | ✅ Yes |
 | **GPTQ** | 1.2 GB | 1.8x | 99.1% | ⭐⭐⭐⭐ | ✅ Yes |
 | **AWQ** | 1.1 GB | 2.0x | 99.0% | ⭐⭐⭐⭐⭐ | ⚠️ Experimental |
+| **ONNX INT8** | 1.1 GB | 2.2x | 99.0% | ⭐⭐ | ✅ Yes |
 
-### Speedup Comparison
+### Deployment Framework Comparison
 
-![Speedup Comparison](07_speedup_comparison.png)
-
-```
-Method                  Speedup    Impact
-─────────────────────────────────────────
-FP32 Baseline           1.0x       Reference
-FP16                    1.15x      Modest
-INT8                    1.22x      Standard
-INT4-NF4                3.3x       ⭐ BEST
-GPTQ                    1.06x      Fine-tuned
-AWQ                     1.11x      Optimized
-INT4-NF4 + Speculative  3.3x       🚀 Maximum
-```
+| Framework | Platform | Speedup | Best For |
+|-----------|----------|---------|----------|
+| **PyTorch** | NVIDIA GPU | 1.0x (baseline) | Research, prototyping |
+| **ONNX Runtime** | CPU/GPU/Edge | 1.0-2.2x | Cross-platform deployment |
+| **TensorRT** | NVIDIA GPU | 2-4x | Production NVIDIA systems |
 
 ### GPU Hardware Comparison
-
-![GPU Cost Comparison](08_gpu_cost_comparison.png)
 
 | GPU | Memory | Cost | Model Fit | Status |
 |-----|--------|------|-----------|--------|
@@ -286,6 +303,15 @@ INT4-NF4 + Speculative  3.3x       🚀 Maximum
 └─────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────┐
+│           ONNX Runtime Integration (NEW)           │
+├─────────────────────────────────────────────────────┤
+│ • torch.onnx.export() conversion                   │
+│ • ORTQuantizer INT8 quantization                   │
+│ • Cross-platform deployment support                │
+│ • 2.2x speedup with 75% compression               │
+└─────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────┐
 │      Speculative Decoding Acceleration Engine      │
 ├─────────────────────────────────────────────────────┤
 │ • Draft model (fast, small)                        │
@@ -306,9 +332,10 @@ INT4-NF4 + Speculative  3.3x       🚀 Maximum
 
 ### Technology Stack
 
-- **Deep Learning:** PyTorch 2.0+
+- **Deep Learning:** PyTorch 2.0+, CUDA 12.6
 - **Quantization:** bitsandbytes, auto-gptq, auto-awq
-- **Models:** Hugging Face Transformers
+- **Cross-Platform:** ONNX Runtime, onnxruntime-quantization
+- **Models:** Hugging Face Transformers (Phi-3-mini, Llama-3.2-3B)
 - **GPU Programming:** CUDA 12.0+
 - **Profiling:** PyTorch Profiler, NVIDIA Tools
 - **Visualization:** Matplotlib, Seaborn
@@ -341,12 +368,18 @@ transformers>=4.30.0
 bitsandbytes>=0.41.0
 auto-gptq>=0.5.0
 auto-awq>=0.2.0
+onnx>=1.14.0
+onnxruntime>=1.16.0
+onnxruntime-gpu>=1.16.0
 pandas>=1.5.0
 numpy>=1.24.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 accelerate>=0.20.0
 safetensors>=0.3.0
+peft>=0.5.0
+datasets>=2.14.0
+tqdm>=4.65.0
 ```
 
 ### Quick Start
@@ -355,15 +388,14 @@ safetensors>=0.3.0
 # Launch Jupyter notebook
 jupyter notebook quantization_speculative_benchmark.ipynb
 
-# Follow the 8 sections:
-# 1. Title & Overview
-# 2. Setup & Environment
-# 3. GPU Profiler
-# 4. Quantization Framework
-# 5. Speculative Decoding
-# 6. Benchmarking Suite
-# 7. Visualization Tools
-# 8. Summary & Recommendations
+# Follow the 7 sections:
+# 1. Setup & Environment
+# 2. GPU Profiler
+# 3. Quantization Framework
+# 4. Speculative Decoding
+# 5. Benchmarking Suite
+# 6. Visualization Tools
+# 7. Summary & Recommendations
 ```
 
 ---
@@ -374,6 +406,7 @@ jupyter notebook quantization_speculative_benchmark.ipynb
 quantization-speculative-decoding-benchmark/
 ├── README.md
 ├── quantization_speculative_benchmark.ipynb   # Main notebook
+├── requirements.txt
 ├── 01_memory_comparison.png
 ├── 02_throughput_comparison.png
 ├── 03_accuracy_vs_compression.png
@@ -382,50 +415,6 @@ quantization-speculative-decoding-benchmark/
 ├── 06_comparison_matrix.png
 ├── 07_speedup_comparison.png
 └── 08_gpu_cost_comparison.png
-```
-
----
-
-## 📊 Benchmark Results
-
-### Testing Configuration
-
-- **Models:** GPT-2 (124M), Phi-3-mini (3.8B), Llama-2-7B
-- **GPUs:** T4, L4, A100, H100, RTX4090
-- **Metrics:** Memory, throughput, latency, accuracy, GPU utilization
-- **Warmup:** 3 runs to stabilize GPU state
-- **Profiling:** 10 measurement runs for statistical significance
-
-### Summary Results
-
-```
-Optimization Impact (vs FP32 Baseline):
-
-Memory:     3.8 GB → 0.95 GB (75% reduction)
-Speed:      45 t/s → 150 t/s (3.3x faster)
-Accuracy:   99.5% → 98.8% (0.7% loss)
-Cost:       $350k → $50k/month (86% savings)
-GPU:        A100 ($10k) → L4 ($500) (20x cheaper)
-```
-
-### Real-World Impact
-
-**Scenario: Serving 1M inference requests per day**
-
-```
-Without Optimization:
-├─ GPU time: 1M × 22ms = ~25,000 GPU-hours
-├─ Hardware: ~35 GPUs needed
-├─ Monthly cost: $350,000
-└─ Annual CO2: ~8,750 kg
-
-With INT4-NF4 + Speculative:
-├─ GPU time: 1M × 6.7ms = ~7,000 GPU-hours (3.3x faster)
-├─ Hardware: ~10 GPUs needed (3x fewer)
-├─ Monthly cost: $50,000 (86% reduction)
-└─ Annual CO2: ~2,500 kg (71% reduction)
-
-SAVINGS: $3.6M/year + 6,250 kg CO2 annually
 ```
 
 ---
@@ -439,6 +428,15 @@ Memory: 0.95 GB
 Speed: 3.3x faster
 Accuracy: 98.8%
 Use Cases: Mobile apps, IoT devices, edge servers
+```
+
+### For Cross-Platform (Portability Required)
+```yaml
+Recommended: ONNX INT8
+Memory: 1.1 GB
+Speed: 2.2x faster
+Accuracy: 99.0%
+Use Cases: Multi-platform deployment, CPU inference, edge devices
 ```
 
 ### For Real-Time (Latency Critical)
@@ -475,7 +473,8 @@ Use Cases: Medical AI, financial analysis, mission-critical
 ### What Makes This Project Stand Out
 
 ✅ **Data-Driven Approach** - Measures before optimizing, not guessing  
-✅ **Comprehensive Evaluation** - 5 methods systematically compared  
+✅ **Comprehensive Evaluation** - 5+ methods systematically compared  
+✅ **Cross-Platform Support** - ONNX Runtime for portable deployment  
 ✅ **Real-World Validation** - Tested on multiple GPUs and models  
 ✅ **Production-Grade** - Error handling, documentation, reproducibility  
 ✅ **Business Impact** - Shows $3.6M annual cost savings  
@@ -486,6 +485,7 @@ Use Cases: Medical AI, financial analysis, mission-critical
 
 - GPU architecture and CUDA optimization
 - PyTorch model optimization techniques
+- ONNX export and cross-platform deployment
 - Quantization methods and trade-offs
 - Speculative decoding implementation
 - Performance benchmarking and profiling
@@ -498,8 +498,8 @@ Use Cases: Medical AI, financial analysis, mission-critical
 
 Contributions welcome! Areas of interest:
 
-- [ ] Additional quantization methods (ONNX, TensorRT)
-- [ ] More model support (Mistral, Code Llama, etc.)
+- [ ] TensorRT integration benchmarks
+- [ ] Additional model support (Mistral, Code Llama, etc.)
 - [ ] Additional GPU support (AMD, Intel accelerators)
 - [ ] Distributed inference optimization
 - [ ] Training-time optimization techniques
@@ -515,25 +515,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-## 📞 Contact & Support
-
-- **Issues:** [GitHub Issues](https://github.com/yourusername/quantization-speculative-decoding-benchmark/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/quantization-speculative-decoding-benchmark/discussions)
-- **Email:** your.email@example.com
-- **LinkedIn:** [Your Profile](https://linkedin.com/in/yourprofile)
-
----
-
-## 🙏 Acknowledgments
-
-- NVIDIA for CUDA and GPU optimization resources
-- Hugging Face for transformers library
-- Meta, Microsoft for open-source LLMs
-- PyTorch team for excellent documentation
-- Research community for quantization innovations
-
----
-
 ## 📚 References
 
 ### Key Research Papers
@@ -546,14 +527,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ### Useful Resources
 
 - [PyTorch Quantization Documentation](https://pytorch.org/docs/stable/quantization.html)
+- [ONNX Runtime Documentation](https://onnxruntime.ai/docs/)
 - [NVIDIA CUDA Programming Guide](https://docs.nvidia.com/cuda/)
 - [Hugging Face Model Hub](https://huggingface.co/models)
-
----
-
-## ⭐ Star History
-
-If you find this project useful, please star us on GitHub!
 
 ---
 
