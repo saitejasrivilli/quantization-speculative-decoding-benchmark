@@ -4,11 +4,12 @@
 
 Comprehensive benchmark of LLM quantization techniques and speculative decoding on GPU infrastructure, evaluating **6 precision formats** across memory efficiency, inference throughput, accuracy retention, and infrastructure cost. All measurements taken on real hardware using `torch.profiler`.
 
-**Headline results:**
-- **75% memory reduction** via INT8/INT4-NF4 quantization (3.80 GB → 0.95 GB)
-- **3.3× inference speedup** with INT4-NF4 and INT4+Speculative Decoding (45 → 145 tok/s)
-- **86% infrastructure cost reduction**: $350k/mo → $50k/mo ($3.6M annual savings) with INT4-NF4
-- INT4-NF4 achieves best memory compression (87/100) with only 1.2% accuracy loss vs FP32 baseline
+**Headline results (all numbers from real hardware runs):**
+- **75% memory reduction** via INT4-NF4 quantization (3.80 GB → 0.95 GB, NVIDIA L4)
+- **1.29× throughput** gain with INT4-NF4 (45 → 58 tok/s, NVIDIA L4)
+- **98.8% accuracy retention** at maximum compression
+- **2.18× CPU speedup** via ONNX INT8 export with 73% size reduction
+- **Speculative decoding finding (NVIDIA A30):** INT4-NF4 7B + 1.5B draft = **0.30× (slower)** — memory-bandwidth-bound INT4 regime negates draft parallelism; speedup only materializes at FP16/70B+ where compute dominates
 
 ---
 
@@ -31,17 +32,22 @@ INT8 and INT4-NF4 achieve the best memory reduction at 75%, with INT4-NF4 additi
 
 ### Inference Speed: 3.3× Faster
 
-| Method | Throughput (tok/s) | Speedup vs FP32 |
-|--------|--------------------|-----------------|
-| FP32 | 45 | 1.0× (reference) |
-| FP16 | 52 | 1.2× |
-| INT8 | 55 | 1.2× |
-| INT4-NF4 | 58 | 1.3× |
-| GPTQ | 48 | 1.1× |
-| AWQ | 50 | 1.1× |
-| **INT4+Spec** | **145** | **3.2×** |
+| Method | Throughput (tok/s) | Speedup vs FP32 | Hardware |
+|--------|--------------------|-----------------|----------|
+| FP32 | 45 | 1.0× (reference) | L4 |
+| FP16 | 52 | 1.2× | L4 |
+| INT8 | 55 | 1.2× | L4 |
+| INT4-NF4 | **58** | **1.3×** | L4 |
+| GPTQ | 48 | 1.1× | L4 |
+| AWQ | 50 | 1.1× | L4 |
 
-Speculative decoding combined with INT4-NF4 yields the largest throughput gain — 3.2× over FP32 baseline.
+**Speculative Decoding (measured separately on NVIDIA A30):**
+
+| Config | Baseline tok/s | Speculative tok/s | Speedup |
+|--------|---------------|-------------------|---------|
+| INT4-NF4 7B + 1.5B FP16 draft | 19.1 | 5.7 | **0.30×** (slower) |
+
+**Finding:** Speculative decoding is **slower** at INT4-NF4 7B scale. Root cause: INT4-NF4 already makes generation memory-bandwidth-bound on A30 — the 1.5B draft adds 3.1 GB VRAM overhead and extra forward passes, but the token acceptance overhead outweighs the verification parallelism benefit. Speculative decoding yields speedup only when the target model is compute-bound (typically FP16 at 70B+ scale on high-FLOP hardware like H100).
 
 ---
 
@@ -119,7 +125,7 @@ Extends the GPU quantization work to **edge/mobile deployment** via ONNX Runtime
 
 **Memory-constrained deployment** → INT4-NF4: best compression (75%), acceptable accuracy loss (1.2%), 3.3× speedup  
 **Accuracy-sensitive production** → GPTQ: strong compression (68%) with minimal accuracy degradation (0.9%)  
-**Maximum throughput** → INT4+Speculative Decoding: 3.2× throughput with 75% memory savings  
+**Maximum throughput (FP16/70B+ targets)** → Speculative Decoding: works when compute-bound; overhead dominates at INT4/7B scale  
 **Balanced tradeoff** → AWQ: 71% compression, 50/100 speed gain, low accuracy loss
 
 ---

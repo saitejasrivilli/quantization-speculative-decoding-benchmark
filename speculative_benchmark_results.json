@@ -1,0 +1,16 @@
+{
+  "date": "2026-06-09",
+  "hardware": "NVIDIA A30",
+  "target_model": "Qwen/Qwen2.5-7B-Instruct",
+  "target_quant": "INT4-NF4",
+  "draft_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "draft_quant": "FP16",
+  "max_new_tokens": 128,
+  "num_speculate_K": 4,
+  "bench_runs": 8,
+  "baseline_toks_per_sec": 19.1,
+  "speculative_toks_per_sec": 5.7,
+  "speedup": 0.3,
+  "vram_target_only_gb": 5.56,
+  "vram_target_plus_draft_gb": 8.65
+}
